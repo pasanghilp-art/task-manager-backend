@@ -8,21 +8,22 @@ app.use(cors());
 let Tasks = [];
 
 app.get('/tasks',(req,res)=>{
-    res.send(Tasks);
+    res.json(Tasks);
 });
 
 app.post('/tasks',(req,res)=>{
     const newTask = {
         id: crypto.randomUUID(),
+        done: false,
         ...req.body
     }
 
     Tasks.push(newTask);
-    res.status(201).send(Tasks);
+    res.status(201).json(newTask);
 });
 
 app.put('/tasks/:id',(req,res)=>{
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const taskExists = Tasks.some(task => task.id === id);
     if (!taskExists) {
         return res.status(404).json({ error: 'Task not found' });
@@ -31,11 +32,12 @@ app.put('/tasks/:id',(req,res)=>{
     Tasks = Tasks.map(Task => Task.id === id? {
         ...Task, ...req.body
     }: Task)
-    res.send(Tasks);
+    const updatedTask = Tasks.find(t => t.id === id);
+    res.json(updatedTask);
 });
 
 app.delete('/tasks/:id',(req,res)=>{
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
 
     const taskExists = Tasks.some(task => task.id === id);
     if (!taskExists) {
@@ -45,4 +47,5 @@ app.delete('/tasks/:id',(req,res)=>{
     res.json(Tasks);
 });
 
-app.listen(3000, () => console.log('Listening on port 3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(3000, () => console.log(`Listening on port ${PORT}`));
