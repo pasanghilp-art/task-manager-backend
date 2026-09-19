@@ -32,6 +32,7 @@ app.post('/tasks',async (req,res)=>{
     res.status(201).json(newTask);
     } catch(e){
         console.log(e.message);
+        res.status(400).json({ error: 'Invalid task', message: e.message });
     }
     });
 
