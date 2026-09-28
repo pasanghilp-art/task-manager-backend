@@ -18,7 +18,7 @@ let Tasks = [];
 
 app.get('/tasks', async (req,res)=>{
     try {
-        const tasks = await Task.find(req.body);
+        const tasks = await Task.find();
         res.json(tasks);
         } catch(e){
         console.log(e.message);
