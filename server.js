@@ -7,15 +7,15 @@ const passport = require('passport');
 const session = require('express-session');
 const cors = require('cors');
 
-const Task = require('./taskSchema');
-const User = require('./login-server/userSchema');
+const Task = require('./Schemas/taskSchema');
+const User = require('./Schemas/userSchema');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
     .then(()=> console.log('Connected to MongoDB'))
     .catch((err)=> console.log('Connection error', err.message));
 
-const initializePassport = require('./login-server/passport-config');
+const initializePassport = require('./passport-config');
 initializePassport(passport);
 
 app.use(express.json());

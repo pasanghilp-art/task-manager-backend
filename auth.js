@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
-const User = require('./login-server/userSchema');
+const User = require('./Schemas/userSchema');
 
 router.post('/register', async (req, res) => {
     try {
