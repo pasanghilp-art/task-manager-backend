@@ -1,20 +1,44 @@
 require('dotenv').config();
 
 const express = require('express');
+const app = express();
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const session = require('express-session');
 const cors = require('cors');
 
-const Task = require('./task');
-const mongoose = require('mongoose');
+const Task = require('./taskSchema');
+const User = require('./login-server/userSchema');
 
+const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
     .then(()=> console.log('Connected to MongoDB'))
     .catch((err)=> console.log('Connection error', err.message));
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const initializePassport = require('./login-server/passport-config');
+initializePassport(passport);
 
-let Tasks = [];
+app.use(express.json());
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+function checkAuthenticated(req, res, next){
+    if(req.isAuthenticated()) return next();
+    res.status(401).json({ message: 'Not logged in'});
+}
+
+const authRoutes = require('./auth');
+app.use('/api', authRoutes);
 
 app.get('/tasks', async (req,res)=>{
     try {
@@ -49,6 +73,7 @@ app.put('/tasks/:id',async (req,res)=>{
     }
     catch(e){
         console.log(e.message);
+        res.status(400).json({ error: 'Invalid task', message: e.message });
     }
 });
 
@@ -63,8 +88,9 @@ app.delete('/tasks/:id',async (req,res)=>{
     }
     catch (e){
         console.log(e.message);
+        res.status(400).json({ error: 'Invalid task', message: e.message });
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(3000, () => console.log(`Listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
