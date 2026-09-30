@@ -36,7 +36,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.set('trusted proxy', 1);
+app.set('trust proxy', 1);
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -47,7 +47,7 @@ app.use(session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7,
         secure: isProduction,
-        sameSIte: isProduction ? 'none' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
     },
 }));
 app.use(passport.initialize());
