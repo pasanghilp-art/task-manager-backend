@@ -19,7 +19,26 @@ const initializePassport = require('./passport-config');
 initializePassport(passport);
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://task-manager-react-6uff.onrender.com',
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+}));
+
+app.set('trusted proxy', 1);
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -27,6 +46,8 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7,
+        secure: isProduction,
+        sameSIte: isProduction ? 'none' : 'lax',
     },
 }));
 app.use(passport.initialize());
