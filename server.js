@@ -39,7 +39,7 @@ app.use(cors({
 app.set('trust proxy', 1);
 
 const isProduction = process.env.NODE_ENV === 'production';
-const MongoStore = require('connect-mongo');
+const { MongoStore } = require('connect-mongo');
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
