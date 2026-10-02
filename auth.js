@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('./Schemas/userSchema');
+const checkAuthenticated = require('./authMiddleware');
 
 router.post('/register', async (req, res) => {
     try {
@@ -23,27 +24,33 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) return next(err);
-        if (!user) return res.status(401).json({ message: info.message });
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if(!user){
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-        req.logIn(user, (err) => {
-            if (err) return next(err);
-            res.json({ id: user.id, name: user.name, email: user.email });
-        });
-    })(req, res, next);
+        const match = await bcrypt.compare(password, user.password);
+        if (!match){
+            return res.status(401).json({ message: 'Invalid email or password '});
+        }
+
+        const token = jwt.sign(
+            { id: user.id, name: user.name, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' },
+        );
+
+        res.json({ token, id: user.id, name: user.name, email: user.email});
+    } catch (e){
+        console.log(e.message);
+        res.status(500).json({ message: 'Server error'});
+    }
 });
 
-router.post('/logout', (req, res, next) => {
-    req.logout((err) => {
-        if (err) return next(err);
-        res.json({ message: 'Logged out' });
-    });
-});
-
-router.get('/me', (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: 'Not logged in' });
+router.get('/me', checkAuthenticated, (req, res) => {
     res.json({ id: req.user.id, name: req.user.name, email: req.user.email });
 });
 
