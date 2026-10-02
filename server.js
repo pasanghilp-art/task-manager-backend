@@ -3,8 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
-const passport = require('passport');
-const session = require('express-session');
 const cors = require('cors');
 
 const Task = require('./Schemas/taskSchema');
@@ -14,9 +12,6 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
     .then(()=> console.log('Connected to MongoDB'))
     .catch((err)=> console.log('Connection error', err.message));
-
-const initializePassport = require('./passport-config');
-initializePassport(passport);
 
 app.use(express.json());
 
@@ -36,31 +31,9 @@ app.use(cors({
     credentials: true,
 }));
 
-app.set('trust proxy', 1);
-
-const isProduction = process.env.NODE_ENV === 'production';
-const { MongoStore } = require('connect-mongo');
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        client: mongoose.connection.getClient(),
-        collectionName: 'sessions',
-    }),
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7,
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
-    },
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-
-function checkAuthenticated(req, res, next){
-    if(req.isAuthenticated()) return next();
-    res.status(401).json({ message: 'Not logged in'});
-}
+/*
+app.use(cors());
+*/
 
 const authRoutes = require('./auth');
 app.use('/api', authRoutes);
