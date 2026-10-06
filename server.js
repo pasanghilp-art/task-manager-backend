@@ -2,11 +2,9 @@ require('dotenv').config();
 
 const express = require('express');
 const app = express();
-const bcrypt = require('bcrypt');
 const cors = require('cors');
 
 const Task = require('./Schemas/taskSchema');
-const User = require('./Schemas/userSchema');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
@@ -27,8 +25,7 @@ app.use(cors({
         } else {
             callback(new Error('Not allowed by CORS'));
         }
-    },
-    credentials: true,
+    }
 }));
 
 /*
