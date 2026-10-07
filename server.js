@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
+const checkAuthenticated = require('./authMiddleware');
+const { requireUser } = checkAuthenticated;
+
 const Task = require('./Schemas/taskSchema');
 
 const mongoose = require('mongoose');
@@ -35,9 +38,9 @@ app.use(cors());
 const authRoutes = require('./auth');
 app.use('/api', authRoutes);
 
-app.get('/tasks', async (req,res)=>{
+app.get('/tasks',checkAuthenticated, requireUser, async (req,res)=>{
     try {
-        const tasks = await Task.find();
+        const tasks = await Task.find({ user: req.user.id });
         res.json(tasks);
         } catch(e){
         console.log(e.message);
@@ -45,9 +48,10 @@ app.get('/tasks', async (req,res)=>{
     }
 });
 
-app.post('/tasks',async (req,res)=>{
+app.post('/tasks',checkAuthenticated, requireUser,async (req,res)=>{
     try {
-    const newTask = await Task.create(req.body);
+    const { name, priority, done } = req.body;
+    const newTask = await Task.create({ name, priority, done, user: req.user.id });
     res.status(201).json(newTask);
     } catch(e){
         console.log(e.message);
@@ -55,33 +59,28 @@ app.post('/tasks',async (req,res)=>{
     }
     });
 
-app.put('/tasks/:id',async (req,res)=>{
+app.put('/tasks/:id', checkAuthenticated, requireUser, async (req, res) => {
     try {
-        const id = req.params.id;
-        const updatedTask = await Task.findByIdAndUpdate(id, req.body, { returnDocument: 'after', runValidators: true });
-
-        if (!updatedTask) {
-        return res.status(404).json({ error: 'Task not found' });
-        }
-
+        const { name, priority, done } = req.body;
+        const updatedTask = await Task.findOneAndUpdate(
+            { _id: req.params.id, user: req.user.id },
+            { name, priority, done },
+            { returnDocument: 'after', runValidators: true },
+        );
+        if (!updatedTask) return res.status(404).json({ error: 'Task not found' });
         res.json(updatedTask);
-    }
-    catch(e){
+    } catch (e) {
         console.log(e.message);
         res.status(400).json({ error: 'Invalid task', message: e.message });
     }
 });
 
-app.delete('/tasks/:id',async (req,res)=>{
+app.delete('/tasks/:id', checkAuthenticated, requireUser, async (req, res) => {
     try {
-         const id = req.params.id;
-        const TaskDelete = await Task.findByIdAndDelete(id);
-         if(!TaskDelete){
-            return res.status(404).json({ error: "Task not found"});
-    }
-    res.json(TaskDelete);
-    }
-    catch (e){
+        const deleted = await Task.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+        if (!deleted) return res.status(404).json({ error: 'Task not found' });
+        res.json(deleted);
+    } catch (e) {
         console.log(e.message);
         res.status(400).json({ error: 'Invalid task', message: e.message });
     }
