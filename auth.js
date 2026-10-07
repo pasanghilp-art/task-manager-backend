@@ -51,11 +51,15 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/guest', (req, res)=> {
+    try {
     const token = jwt.sign(
         { guest: true, name: 'Guest'},
         process.env.jWT_SECRET,
         { expiresIn: '1h'},
     );
+    } catch (err){
+        console.log(err);
+    }
     res.json({ token, name: 'Guest', guest: true });
 });
 

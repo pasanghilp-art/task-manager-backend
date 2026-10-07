@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log('JWT_SECRET length:', (process.env.JWT_SECRET || '').length);
 
 const express = require('express');
 const app = express();
