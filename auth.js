@@ -54,7 +54,7 @@ router.post('/guest', (req, res)=> {
     try {
     const token = jwt.sign(
         { guest: true, name: 'Guest'},
-        process.env.jWT_SECRET,
+        process.env.JWT_SECRET,
         { expiresIn: '1h'},
     );
     } catch (err){
