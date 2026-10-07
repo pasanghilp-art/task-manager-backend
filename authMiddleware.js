@@ -16,4 +16,12 @@ function checkAuthenticated(req,res,next){
         }
 }
 
+function requireUser(req, res, next){
+    if (req.user.guest){
+        return res.status(403).json({ messaage: 'Guests cannot save tasks'});
+    }
+    next();
+}
+
 module.exports = checkAuthenticated;
+module.exports.requireUser = requireUser;

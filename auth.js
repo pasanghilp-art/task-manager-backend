@@ -50,8 +50,19 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/guest', (req, res)=> {
+    const token = jwt.sign(
+        { guest: true, name: 'Guest'},
+        process.env.jWT_SECRET,
+        { expiresIn: '1h'},
+    );
+    res.json({ token, name: 'Guest', guest: true });
+});
+
 router.get('/me', checkAuthenticated, (req, res) => {
-    res.json({ id: req.user.id, name: req.user.name, email: req.user.email });
+    res.json({ id: req.user.id, name: req.user.name, email: req.user.email,
+        guest: !!req.user.guest,
+     });
 });
 
 module.exports = router;
