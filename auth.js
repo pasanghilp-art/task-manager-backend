@@ -57,10 +57,10 @@ router.post('/guest', (req, res)=> {
         process.env.JWT_SECRET,
         { expiresIn: '1h'},
     );
+        res.json({ token, name: 'Guest', guest: true });
     } catch (err){
         console.log(err);
     }
-    res.json({ token, name: 'Guest', guest: true });
 });
 
 router.get('/me', checkAuthenticated, (req, res) => {
