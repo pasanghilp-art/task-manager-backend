@@ -8,6 +8,7 @@ const checkAuthenticated = require('./authMiddleware');
 const { requireUser } = checkAuthenticated;
 
 const Task = require('./Schemas/taskSchema');
+const Expense = required('./Schemas/expenseSchema');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
@@ -83,6 +84,45 @@ app.delete('/tasks/:id', checkAuthenticated, requireUser, async (req, res) => {
     } catch (e) {
         console.log(e.message);
         res.status(400).json({ error: 'Invalid task', message: e.message });
+    }
+});
+
+
+
+app.get('/expenses', checkAuthenticated, requireUser, async (req, res) => {
+    try {
+        const expenses = await Expense.find({ user: req.user.id });
+        res.json(expenses);
+    } catch (e) {
+        console.log(e.message);
+        res.status(500).json({ error: 'Server error', message: e.message });
+    }
+});
+
+app.post('/expenses', checkAuthenticated, requireUser, async (req, res) => {
+    try {
+        const { amount, category, date, note } = req.body;
+        const newExpense = await Expense.create({
+            amount, category, date, note, user: req.user.id,
+        });
+        res.status(201).json(newExpense);
+    } catch (e) {
+        console.log(e.message);
+        res.status(400).json({ error: 'Invalid expense', message: e.message });
+    }
+});
+
+app.delete('/expenses/:id', checkAuthenticated, requireUser, async (req, res) => {
+    try {
+        const deleted = await Expense.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user.id,
+        });
+        if (!deleted) return res.status(404).json({ error: 'Expense not found' });
+        res.json(deleted);
+    } catch (e) {
+        console.log(e.message);
+        res.status(400).json({ error: 'Invalid expense', message: e.message });
     }
 });
 
