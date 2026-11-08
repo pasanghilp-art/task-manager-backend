@@ -8,7 +8,7 @@ const checkAuthenticated = require('./authMiddleware');
 const { requireUser } = checkAuthenticated;
 
 const Task = require('./Schemas/taskSchema');
-const Expense = required('./Schemas/expenseSchema');
+const Expense = require('./Schemas/expensesSchema');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
