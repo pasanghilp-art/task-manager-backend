@@ -9,6 +9,7 @@ const { requireUser } = checkAuthenticated;
 
 const Task = require('./Schemas/taskSchema');
 const Expense = require('./Schemas/expensesSchema');
+const aiRoutes = require('./ai/aiRoutes');
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI)
@@ -125,6 +126,8 @@ app.delete('/expenses/:id', checkAuthenticated, requireUser, async (req, res) =>
         res.status(400).json({ error: 'Invalid expense', message: e.message });
     }
 });
+
+app.use('/ai', checkAuthenticated, requireUser, aiRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
