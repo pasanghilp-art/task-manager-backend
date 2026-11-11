@@ -1,5 +1,5 @@
 const express = require('express');
-const { genrateReply } = require('./aiProvider');
+const { generateReply } = require('./aiProvider');
 
 const router = express.Router();
 
