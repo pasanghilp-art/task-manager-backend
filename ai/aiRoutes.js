@@ -28,12 +28,11 @@ router.post('/chat', async (req, res) => {
         const reply = await generateReply(clean);
         res.json({ reply });
     } catch (e) {
-        console.log(e.message);
-        if (e.status === 429) {
-            return res.status(429).json({ error: 'Too many requests, try again in a minute.' });
+            console.log(e.message);
+            if (e.status === 503 || e.status === 429) {
+             return res.status(503).json({ error: 'The AI is busy right now. Please try again in a moment.' });
+            }
         }
-        res.status(500).json({ error: 'AI error', message: e.message });
-    }
 });
 
 module.exports = router;
