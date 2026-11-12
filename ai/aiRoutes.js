@@ -28,7 +28,6 @@ function buildTaskContext(tasks) {
 
 router.post('/chat', async (req, res) => {
     try {
-        return res.json({ reply: 'test reply' });
          const { messages } = req.body;
 
         if (!Array.isArray(messages) || messages.length === 0) {
@@ -52,6 +51,7 @@ router.post('/chat', async (req, res) => {
         const tasks = await Task.find({ user: req.user.id }).limit(50).lean();
         const context = buildTaskContext(tasks);
         const reply = await generateReply(clean, context);
+        res.json({ reply });
     } catch (e) {
             console.log(e.message);
             if (e.status === 503 || e.status === 429) {
