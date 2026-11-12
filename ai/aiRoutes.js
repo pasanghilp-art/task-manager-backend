@@ -28,6 +28,7 @@ function buildTaskContext(tasks) {
 
 router.post('/chat', async (req, res) => {
     try {
+        return res.json({ reply: 'test reply' });
          const { messages } = req.body;
 
         if (!Array.isArray(messages) || messages.length === 0) {
